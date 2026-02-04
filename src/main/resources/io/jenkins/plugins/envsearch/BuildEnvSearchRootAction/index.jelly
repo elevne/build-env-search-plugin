@@ -1,0 +1,201 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:st="jelly:stapler">
+  <l:layout title="Build Env Search">
+    <l:side-panel>
+      <l:tasks>
+        <l:task icon="symbol-arrow-left" href="${rootURL}/" title="${%Back to Dashboard}" />
+      </l:tasks>
+    </l:side-panel>
+    <l:main-panel>
+      <h1>Build Environment Search</h1>
+      <p>Search builds by environment variable key and value.</p>
+
+      <div style="margin: 20px 0; padding: 20px; border: 1px solid var(--input-border); border-radius: 6px; background: var(--input-bg, #fff);">
+        <table style="border-collapse: separate; border-spacing: 10px;">
+          <tr>
+            <td><label for="envKey" style="font-weight:bold;">Environment Variable Key:</label></td>
+            <td><input type="text" id="envKey" placeholder="e.g. GERRIT_CHANGE_NUMBER" style="width:350px; padding:6px 10px;" /></td>
+          </tr>
+          <tr>
+            <td><label for="envValue" style="font-weight:bold;">Value:</label></td>
+            <td><input type="text" id="envValue" placeholder="e.g. 702276" style="width:350px; padding:6px 10px;" /></td>
+          </tr>
+          <tr>
+            <td><label for="maxBuilds" style="font-weight:bold;">Max Builds per Job:</label></td>
+            <td><input type="number" id="maxBuilds" value="50" min="1" max="1000" style="width:100px; padding:6px 10px;" /></td>
+          </tr>
+          <tr>
+            <td />
+            <td>
+              <button id="searchBtn" type="button" class="jenkins-button jenkins-button--primary" style="padding: 8px 24px;">
+                Search
+              </button>
+              <span id="spinner" style="display:none; margin-left:10px;">Searching...</span>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div id="resultArea" style="margin-top: 20px; display: none;">
+        <h2>Results (<span id="resultCount">0</span> builds found)</h2>
+        <table id="resultTable" class="jenkins-table sortable" style="width:100%;">
+          <thead>
+            <tr>
+              <th>Job Name</th>
+              <th>Build #</th>
+              <th>Status</th>
+              <th>Started</th>
+              <th>Duration</th>
+            </tr>
+          </thead>
+          <tbody id="resultBody">
+          </tbody>
+        </table>
+      </div>
+
+      <div id="noResults" style="margin-top: 20px; display: none;">
+        <p>No builds found matching the given environment variable.</p>
+      </div>
+
+      <div id="errorArea" style="margin-top: 20px; display: none; color: red;">
+        <p id="errorMsg"></p>
+      </div>
+
+      <script>
+        (function() {
+          var searchBtn = document.getElementById('searchBtn');
+          var spinner = document.getElementById('spinner');
+
+          searchBtn.addEventListener('click', function() {
+            var envKey = document.getElementById('envKey').value.trim();
+            var envValue = document.getElementById('envValue').value.trim();
+            var maxBuilds = document.getElementById('maxBuilds').value;
+
+            if (!envKey || !envValue) {
+              showError('Please enter both Key and Value.');
+              return;
+            }
+
+            hideAll();
+            spinner.style.display = 'inline';
+            searchBtn.disabled = true;
+
+            var url = 'search?envKey=' + encodeURIComponent(envKey)
+                    + '&amp;envValue=' + encodeURIComponent(envValue)
+                    + '&amp;maxBuilds=' + encodeURIComponent(maxBuilds);
+
+            fetch(url, {
+              method: 'GET',
+              headers: { 'Accept': 'application/json' }
+            })
+            .then(function(response) {
+              if (!response.ok) throw new Error('HTTP ' + response.status);
+              return response.json();
+            })
+            .then(function(data) {
+              spinner.style.display = 'none';
+              searchBtn.disabled = false;
+
+              if (data.results &amp;&amp; data.results.length > 0) {
+                showResults(data);
+              } else {
+                document.getElementById('noResults').style.display = 'block';
+              }
+            })
+            .catch(function(err) {
+              spinner.style.display = 'none';
+              searchBtn.disabled = false;
+              showError('Search failed: ' + err.message);
+            });
+          });
+
+          // Allow Enter key to trigger search
+          document.getElementById('envKey').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') searchBtn.click();
+          });
+          document.getElementById('envValue').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') searchBtn.click();
+          });
+
+          function hideAll() {
+            document.getElementById('resultArea').style.display = 'none';
+            document.getElementById('noResults').style.display = 'none';
+            document.getElementById('errorArea').style.display = 'none';
+          }
+
+          function showError(msg) {
+            hideAll();
+            document.getElementById('errorMsg').textContent = msg;
+            document.getElementById('errorArea').style.display = 'block';
+          }
+
+          function showResults(data) {
+            var tbody = document.getElementById('resultBody');
+            tbody.innerHTML = '';
+            document.getElementById('resultCount').textContent = data.totalFound;
+
+            var rootUrl = document.head.querySelector('[name=rootURL]');
+            var base = rootUrl ? rootUrl.content : '';
+
+            for (var i = 0; i &lt; data.results.length; i++) {
+              var r = data.results[i];
+              var tr = document.createElement('tr');
+
+              // Job Name
+              var tdJob = document.createElement('td');
+              tdJob.textContent = r.jobName;
+              tr.appendChild(tdJob);
+
+              // Build Number (link)
+              var tdBuild = document.createElement('td');
+              var a = document.createElement('a');
+              a.href = base + '/' + r.buildUrl;
+              a.textContent = '#' + r.buildNumber;
+              tdBuild.appendChild(a);
+              tr.appendChild(tdBuild);
+
+              // Status
+              var tdStatus = document.createElement('td');
+              var statusSpan = document.createElement('span');
+              statusSpan.textContent = r.result;
+              statusSpan.style.fontWeight = 'bold';
+              if (r.result === 'SUCCESS') statusSpan.style.color = 'green';
+              else if (r.result === 'FAILURE') statusSpan.style.color = 'red';
+              else if (r.result === 'UNSTABLE') statusSpan.style.color = 'orange';
+              else if (r.result === 'ABORTED') statusSpan.style.color = 'gray';
+              else if (r.result === 'BUILDING') statusSpan.style.color = 'blue';
+              tdStatus.appendChild(statusSpan);
+              tr.appendChild(tdStatus);
+
+              // Timestamp
+              var tdTime = document.createElement('td');
+              tdTime.textContent = r.timestamp ? new Date(r.timestamp).toLocaleString() : '-';
+              tr.appendChild(tdTime);
+
+              // Duration
+              var tdDuration = document.createElement('td');
+              tdDuration.textContent = formatDuration(r.duration);
+              tr.appendChild(tdDuration);
+
+              tbody.appendChild(tr);
+            }
+
+            document.getElementById('resultArea').style.display = 'block';
+          }
+
+          function formatDuration(ms) {
+            if (!ms || ms &lt;= 0) return '-';
+            var sec = Math.floor(ms / 1000);
+            if (sec &lt; 60) return sec + 's';
+            var min = Math.floor(sec / 60);
+            sec = sec % 60;
+            if (min &lt; 60) return min + 'm ' + sec + 's';
+            var hr = Math.floor(min / 60);
+            min = min % 60;
+            return hr + 'h ' + min + 'm ' + sec + 's';
+          }
+        })();
+      </script>
+    </l:main-panel>
+  </l:layout>
+</j:jelly>
