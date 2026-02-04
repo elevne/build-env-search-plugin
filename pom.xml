@@ -17,6 +17,21 @@
     <packaging>hpi</packaging>
 
     <name>Build Environment Search</name>
+    <url>https://github.com/elevne/build-env-search-plugin</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:https://github.com/elevne/build-env-search-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:elevne/build-env-search-plugin.git</developerConnection>
+        <url>https://github.com/elevne/build-env-search-plugin</url>
+        <tag>${scmTag}</tag>
+    </scm>
 
     <properties>
         <jenkins.version>2.462.3</jenkins.version>
