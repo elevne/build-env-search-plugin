@@ -2,15 +2,17 @@ package io.jenkins.plugins.envsearch;
 
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
-import hudson.model.ParameterDefinition;
 import hudson.model.ParametersAction;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.model.StringParameterDefinition;
 import hudson.model.StringParameterValue;
+import com.gargoylesoftware.htmlunit.Page;
 import net.sf.json.JSONObject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -36,7 +38,7 @@ public class BuildEnvSearchRootActionTest {
 
         // Search using the service
         EnvSearchService service = new EnvSearchService();
-        var results = service.search("GERRIT_CHANGE_NUMBER", "702276", 50);
+        List<BuildSearchResult> results = service.search("GERRIT_CHANGE_NUMBER", "702276", 50);
 
         assertEquals(1, results.size());
         assertEquals("test-job", results.get(0).getJobName());
@@ -57,7 +59,7 @@ public class BuildEnvSearchRootActionTest {
         j.waitForCompletion(build);
 
         EnvSearchService service = new EnvSearchService();
-        var results = service.search("GERRIT_CHANGE_NUMBER", "702276", 50);
+        List<BuildSearchResult> results = service.search("GERRIT_CHANGE_NUMBER", "702276", 50);
 
         assertEquals(0, results.size());
     }
@@ -94,7 +96,7 @@ public class BuildEnvSearchRootActionTest {
 
         // Call REST API via JenkinsRule
         JenkinsRule.WebClient wc = j.createWebClient();
-        var page = wc.goTo("env-search/search?envKey=MY_VAR&envValue=hello", "application/json");
+        Page page = wc.goTo("env-search/search?envKey=MY_VAR&envValue=hello", "application/json");
         String json = page.getWebResponse().getContentAsString();
         JSONObject response = JSONObject.fromObject(json);
 
@@ -137,7 +139,7 @@ public class BuildEnvSearchRootActionTest {
         j.waitForCompletion(b3);
 
         EnvSearchService service = new EnvSearchService();
-        var results = service.search("CHANGE_ID", "100", 50);
+        List<BuildSearchResult> results = service.search("CHANGE_ID", "100", 50);
 
         assertEquals(2, results.size());
     }

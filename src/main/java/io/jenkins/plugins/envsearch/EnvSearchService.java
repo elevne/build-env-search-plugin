@@ -10,6 +10,7 @@ import hudson.model.Run;
 import jenkins.model.Jenkins;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,8 +21,8 @@ public class EnvSearchService {
     private static final int DEFAULT_MAX_BUILDS = 50;
 
     public List<BuildSearchResult> search(String envKey, String envValue, int maxBuildsPerJob) {
-        if (envKey == null || envKey.isBlank() || envValue == null || envValue.isBlank()) {
-            return List.of();
+        if (envKey == null || envKey.trim().isEmpty() || envValue == null || envValue.trim().isEmpty()) {
+            return Collections.emptyList();
         }
 
         if (maxBuildsPerJob <= 0) {
