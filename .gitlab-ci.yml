@@ -10,8 +10,12 @@ cache:
 
 build:
   stage: build
-  image: maven:3.8-openjdk-11
+  tags:
+    - chatops
+    - shell
   script:
+    - export JAVA_HOME=/home/swfarmer/.local/java/jdk-11.0.21+9
+    - export PATH="$JAVA_HOME/bin:/home/swfarmer/.local/maven/apache-maven-3.9.6/bin:$PATH"
     - mvn clean package -DskipTests -B
   artifacts:
     paths:
