@@ -18,7 +18,7 @@ public class BuildEnvSearchRootAction implements RootAction {
 
     @Override
     public String getIconFileName() {
-        return "symbol-search";
+        return "search.png";
     }
 
     @Override

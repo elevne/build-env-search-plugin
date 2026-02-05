@@ -3,7 +3,7 @@
   <l:layout title="Build Env Search">
     <l:side-panel>
       <l:tasks>
-        <l:task icon="symbol-arrow-left" href="${rootURL}/" title="${%Back to Dashboard}" />
+        <l:task icon="images/24x24/up.png" href="${rootURL}/" title="${%Back to Dashboard}" />
       </l:tasks>
     </l:side-panel>
     <l:main-panel>
@@ -38,14 +38,14 @@
 
       <div id="resultArea" style="margin-top: 20px; display: none;">
         <h2>Results (<span id="resultCount">0</span> builds found)</h2>
-        <table id="resultTable" class="jenkins-table sortable" style="width:100%;">
+        <table id="resultTable" class="sortable pane bigtable" style="width:100%; border-collapse:collapse;">
           <thead>
             <tr>
-              <th>Job Name</th>
-              <th>Build #</th>
-              <th>Status</th>
-              <th>Started</th>
-              <th>Duration</th>
+              <th style="text-align:left; padding:8px;">Job Name</th>
+              <th style="text-align:left; padding:8px;">Build #</th>
+              <th style="text-align:left; padding:8px;">Status</th>
+              <th style="text-align:left; padding:8px;">Started</th>
+              <th style="text-align:left; padding:8px;">Duration</th>
             </tr>
           </thead>
           <tbody id="resultBody">
@@ -141,13 +141,17 @@
               var r = data.results[i];
               var tr = document.createElement('tr');
 
+              var cellStyle = 'padding:8px; text-align:left;';
+
               // Job Name
               var tdJob = document.createElement('td');
+              tdJob.setAttribute('style', cellStyle);
               tdJob.textContent = r.jobName;
               tr.appendChild(tdJob);
 
               // Build Number (link)
               var tdBuild = document.createElement('td');
+              tdBuild.setAttribute('style', cellStyle);
               var a = document.createElement('a');
               a.href = base + '/' + r.buildUrl;
               a.textContent = '#' + r.buildNumber;
@@ -156,6 +160,7 @@
 
               // Status
               var tdStatus = document.createElement('td');
+              tdStatus.setAttribute('style', cellStyle);
               var statusSpan = document.createElement('span');
               statusSpan.textContent = r.result;
               statusSpan.style.fontWeight = 'bold';
@@ -169,11 +174,13 @@
 
               // Timestamp
               var tdTime = document.createElement('td');
+              tdTime.setAttribute('style', cellStyle);
               tdTime.textContent = r.timestamp ? new Date(r.timestamp).toLocaleString() : '-';
               tr.appendChild(tdTime);
 
               // Duration
               var tdDuration = document.createElement('td');
+              tdDuration.setAttribute('style', cellStyle);
               tdDuration.textContent = formatDuration(r.duration);
               tr.appendChild(tdDuration);
 
