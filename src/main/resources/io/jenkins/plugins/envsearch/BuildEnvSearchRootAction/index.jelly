@@ -25,6 +25,10 @@
             <td><input type="number" id="maxBuilds" value="50" min="1" max="1000" style="width:100px; padding:6px 10px;" /></td>
           </tr>
           <tr>
+            <td><label for="maxResults" style="font-weight:bold;">Max Total Results:</label></td>
+            <td><input type="number" id="maxResults" value="500" min="1" max="5000" style="width:100px; padding:6px 10px;" /></td>
+          </tr>
+          <tr>
             <td />
             <td>
               <button id="searchBtn" type="button" class="jenkins-button jenkins-button--primary" style="padding: 8px 24px;">
@@ -70,6 +74,7 @@
             var envKey = document.getElementById('envKey').value.trim();
             var envValue = document.getElementById('envValue').value.trim();
             var maxBuilds = document.getElementById('maxBuilds').value;
+            var maxResults = document.getElementById('maxResults').value;
 
             if (!envKey || !envValue) {
               showError('Please enter both Key and Value.');
@@ -82,7 +87,8 @@
 
             var url = 'search?envKey=' + encodeURIComponent(envKey)
                     + '&amp;envValue=' + encodeURIComponent(envValue)
-                    + '&amp;maxBuilds=' + encodeURIComponent(maxBuilds);
+                    + '&amp;maxBuilds=' + encodeURIComponent(maxBuilds)
+                    + '&amp;maxResults=' + encodeURIComponent(maxResults);
 
             fetch(url, {
               method: 'GET',

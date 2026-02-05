@@ -37,18 +37,26 @@ public class BuildEnvSearchRootAction implements RootAction {
             StaplerResponse rsp,
             @QueryParameter String envKey,
             @QueryParameter String envValue,
-            @QueryParameter String maxBuilds
+            @QueryParameter String maxBuilds,
+            @QueryParameter String maxResults
     ) throws Exception {
         Jenkins.get().checkPermission(Jenkins.READ);
 
-        int max;
+        int maxB;
         try {
-            max = (maxBuilds != null && !maxBuilds.isEmpty()) ? Integer.parseInt(maxBuilds) : 50;
+            maxB = (maxBuilds != null && !maxBuilds.isEmpty()) ? Integer.parseInt(maxBuilds) : 50;
         } catch (NumberFormatException e) {
-            max = 50;
+            maxB = 50;
         }
 
-        List<BuildSearchResult> results = searchService.search(envKey, envValue, max);
+        int maxR;
+        try {
+            maxR = (maxResults != null && !maxResults.isEmpty()) ? Integer.parseInt(maxResults) : 500;
+        } catch (NumberFormatException e) {
+            maxR = 500;
+        }
+
+        List<BuildSearchResult> results = searchService.search(envKey, envValue, maxB, maxR);
 
         JSONObject response = new JSONObject();
         response.put("searchKey", envKey);
