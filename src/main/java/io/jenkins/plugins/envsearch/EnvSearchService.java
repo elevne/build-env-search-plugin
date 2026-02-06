@@ -11,11 +11,11 @@ import jenkins.model.Jenkins;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,8 +45,6 @@ public class EnvSearchService {
 
         @SuppressWarnings("rawtypes")
         List allJobs = Jenkins.get().getAllItems(Job.class);
-        ConcurrentLinkedQueue<BuildSearchResult> resultQueue = new ConcurrentLinkedQueue<BuildSearchResult>();
-        AtomicInteger totalFound = new AtomicInteger(0);
 
         ExecutorService executor = Executors.newFixedThreadPool(
                 Math.min(THREAD_POOL_SIZE, Math.max(1, allJobs.size()))
@@ -57,37 +55,78 @@ public class EnvSearchService {
         final int perJobLimit = maxBuildsPerJob;
         final int resultLimit = maxResults;
 
-        for (final Object jobObj : allJobs) {
+        // Create tasks for each job
+        List<Callable<List<BuildSearchResult>>> tasks = new ArrayList<Callable<List<BuildSearchResult>>>();
+        for (Object jobObj : allJobs) {
             final Job<?, ?> job = (Job<?, ?>) jobObj;
-            executor.submit(new Runnable() {
-                public void run() {
-                    if (totalFound.get() >= resultLimit) {
-                        return;
-                    }
+            tasks.add(new Callable<List<BuildSearchResult>>() {
+                public List<BuildSearchResult> call() {
+                    List<BuildSearchResult> localResults = new ArrayList<BuildSearchResult>();
                     int count = 0;
+
                     for (Run<?, ?> run : job.getBuilds()) {
-                        if (count >= perJobLimit || totalFound.get() >= resultLimit) {
+                        if (count >= perJobLimit || localResults.size() >= resultLimit) {
                             break;
                         }
                         count++;
 
                         try {
-                            String matched = findEnvValue(run, searchKey);
+                            String matched = findEnvValueInline(run, searchKey);
                             if (searchValue.equals(matched)) {
-                                resultQueue.add(new BuildSearchResult(run));
-                                totalFound.incrementAndGet();
+                                localResults.add(new BuildSearchResult(run));
                             }
                         } catch (Exception e) {
                             LOGGER.log(Level.FINE, "Failed to read env vars from " + run.getFullDisplayName(), e);
                         }
                     }
+
+                    return localResults;
+                }
+
+                private String findEnvValueInline(Run<?, ?> run, String envKey) {
+                    // 1. Check ParametersAction (build parameters)
+                    ParametersAction paramsAction = run.getAction(ParametersAction.class);
+                    if (paramsAction != null) {
+                        ParameterValue param = paramsAction.getParameter(envKey);
+                        if (param != null) {
+                            Object value = param.getValue();
+                            if (value != null) {
+                                return value.toString();
+                            }
+                        }
+                    }
+
+                    // 2. Check EnvironmentContributingAction instances (Gerrit Trigger, etc.)
+                    for (EnvironmentContributingAction action : run.getActions(EnvironmentContributingAction.class)) {
+                        EnvVars envVars = new EnvVars();
+                        action.buildEnvironment(run, envVars);
+                        String value = envVars.get(envKey);
+                        if (value != null) {
+                            return value;
+                        }
+                    }
+
+                    return null;
                 }
             });
         }
 
-        executor.shutdown();
+        // Execute all tasks and collect results
+        List<BuildSearchResult> allResults = new ArrayList<BuildSearchResult>();
         try {
-            executor.awaitTermination(SEARCH_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            List<Future<List<BuildSearchResult>>> futures = executor.invokeAll(tasks, SEARCH_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            for (Future<List<BuildSearchResult>> future : futures) {
+                try {
+                    if (!future.isCancelled()) {
+                        List<BuildSearchResult> result = future.get();
+                        if (result != null) {
+                            allResults.addAll(result);
+                        }
+                    }
+                } catch (Exception e) {
+                    LOGGER.log(Level.FINE, "Failed to get result from future", e);
+                }
+            }
         } catch (InterruptedException e) {
             LOGGER.log(Level.WARNING, "Search interrupted", e);
             Thread.currentThread().interrupt();
@@ -95,42 +134,17 @@ public class EnvSearchService {
             executor.shutdownNow();
         }
 
-        List<BuildSearchResult> results = new ArrayList<BuildSearchResult>(resultQueue);
-        Collections.sort(results, new java.util.Comparator<BuildSearchResult>() {
+        // Sort by timestamp descending (newest first)
+        Collections.sort(allResults, new java.util.Comparator<BuildSearchResult>() {
             public int compare(BuildSearchResult a, BuildSearchResult b) {
                 return Long.compare(b.getTimestamp(), a.getTimestamp());
             }
         });
 
-        if (results.size() > resultLimit) {
-            return results.subList(0, resultLimit);
+        // Limit results
+        if (allResults.size() > resultLimit) {
+            return allResults.subList(0, resultLimit);
         }
-        return results;
-    }
-
-    private String findEnvValue(Run<?, ?> run, String envKey) {
-        // 1. Check ParametersAction (build parameters) — fast, in-memory
-        ParametersAction paramsAction = run.getAction(ParametersAction.class);
-        if (paramsAction != null) {
-            ParameterValue param = paramsAction.getParameter(envKey);
-            if (param != null) {
-                Object value = param.getValue();
-                if (value != null) {
-                    return value.toString();
-                }
-            }
-        }
-
-        // 2. Check EnvironmentContributingAction instances (Gerrit Trigger, etc.)
-        for (EnvironmentContributingAction action : run.getActions(EnvironmentContributingAction.class)) {
-            EnvVars envVars = new EnvVars();
-            action.buildEnvironment(run, envVars);
-            String value = envVars.get(envKey);
-            if (value != null) {
-                return value;
-            }
-        }
-
-        return null;
+        return allResults;
     }
 }
