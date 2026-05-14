@@ -14,8 +14,12 @@ build:
     - chatops
     - shell
   script:
-    - export JAVA_HOME=/home/swfarmer/.local/java/jdk-11.0.21+9
+    # Parent POM 6.x + maven-hpi-plugin 3.18+ requires JDK 21 to build.
+    # Runner must have JDK 21 pre-staged at this path (coordinated with webos-infraops).
+    - export JAVA_HOME=/home/swfarmer/.local/java/jdk-21.0.11+10
     - export PATH="$JAVA_HOME/bin:/home/swfarmer/.local/maven/apache-maven-3.9.6/bin:$PATH"
+    - java -version
+    - mvn -version
     - mvn clean package -DskipTests -B
   artifacts:
     paths:
