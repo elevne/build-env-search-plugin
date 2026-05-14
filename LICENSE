@@ -1,21 +1,29 @@
-MIT License
+LG Electronics Internal Software License
 
-Copyright (c) 2026 elevne
+Copyright (c) 2026 LG Electronics Inc. All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+본 소프트웨어는 LG Electronics Inc. (이하 "회사") 의 자산이며, 회사 내부 및
+회사가 명시적으로 승인한 협력 업체의 업무 수행 목적에 한하여 사용될 수 있습니다.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+This software is the property of LG Electronics Inc. ("the Company") and is
+intended solely for internal use within the Company and by partners or
+contractors explicitly authorized by the Company.
+
+다음의 행위는 금지됩니다:
+  - 외부 (회사 및 승인된 협력 업체 이외의 제3자) 에 대한 배포 / 공개 / 양도
+  - 사내 승인 없는 무단 복제 및 재배포
+  - 회사 자산임을 가리거나 변경하는 행위
+
+The following are prohibited:
+  - Distribution, disclosure, or transfer to any third party outside the
+    Company and its authorized partners or contractors
+  - Unauthorized copying or redistribution without prior approval
+  - Removal or modification of proprietary notices
+
+본 소프트웨어는 "있는 그대로" 제공되며, 명시적이든 묵시적이든 어떠한 종류의
+보증도 없습니다. 회사는 본 소프트웨어의 사용으로 인한 어떠한 손해에 대해서도
+책임지지 않습니다.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+IMPLIED. THE COMPANY SHALL NOT BE LIABLE FOR ANY DAMAGES ARISING FROM THE USE
+OF THIS SOFTWARE.

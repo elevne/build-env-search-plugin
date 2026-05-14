@@ -6,7 +6,7 @@ import hudson.model.ParametersAction;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.model.StringParameterDefinition;
 import hudson.model.StringParameterValue;
-import com.gargoylesoftware.htmlunit.Page;
+import org.htmlunit.Page;
 import net.sf.json.JSONObject;
 import org.junit.Rule;
 import org.junit.Test;

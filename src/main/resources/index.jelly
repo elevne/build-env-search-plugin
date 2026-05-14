@@ -1,4 +1,10 @@
 <?jelly escape-by-default='true'?>
 <div>
-    Search Jenkins builds by environment variable key/value and view their statuses.
+  Search past Jenkins builds by environment variable key/value pair —
+  both build parameters (<code>ParametersAction</code>) and runtime-injected
+  env (<code>EnvironmentContributingAction</code> from Gerrit Trigger, etc.).
+  Provides a web UI and a REST endpoint at <code>/env-search/search</code>.
+  <br/>
+  Source:
+  <a href="http://mod.lge.com/hub/webos-devops/jenkins/plugins/env-search-plugin">mod.lge.com/hub/webos-devops/jenkins/plugins/env-search-plugin</a>
 </div>

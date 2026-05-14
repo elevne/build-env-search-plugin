@@ -7,8 +7,8 @@ import jenkins.model.Jenkins;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 import org.kohsuke.stapler.verb.GET;
 
 @Extension
@@ -18,7 +18,7 @@ public class BuildEnvSearchRootAction implements RootAction {
 
     @Override
     public String getIconFileName() {
-        return "search.png";
+        return "symbol-search";
     }
 
     @Override
@@ -33,8 +33,8 @@ public class BuildEnvSearchRootAction implements RootAction {
 
     @GET
     public void doSearch(
-            StaplerRequest req,
-            StaplerResponse rsp,
+            StaplerRequest2 req,
+            StaplerResponse2 rsp,
             @QueryParameter String envKey,
             @QueryParameter String envValue,
             @QueryParameter String maxBuilds,

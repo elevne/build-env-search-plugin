@@ -1,11 +1,16 @@
 services:
   jenkins:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cerberus-jenkins-test
+    hostname: cerberus-jenkins-test
     ports:
-      - "8081:8080"
+      - "8888:8080"
       - "50001:50000"
     volumes:
       - jenkins_home:/var/jenkins_home
+    tty: true
 
 volumes:
   jenkins_home:

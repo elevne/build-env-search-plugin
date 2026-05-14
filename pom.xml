@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.40</version>
+        <version>6.2153.vcf31911d10c4</version>
         <relativePath/>
     </parent>
 
@@ -17,33 +17,47 @@
     <packaging>hpi</packaging>
 
     <name>Build Environment Search</name>
-    <url>https://github.com/elevne/build-env-search-plugin</url>
+    <description>Search Jenkins builds by environment variable key/value pairs (build parameters and EnvironmentContributingAction sources such as Gerrit Trigger). Provides a sidebar UI on the main dashboard and a REST endpoint at /env-search/search for programmatic use.</description>
+    <url>http://mod.lge.com/hub/webos-devops/jenkins/plugins/env-search-plugin</url>
 
     <licenses>
         <license>
-            <name>MIT License</name>
-            <url>https://opensource.org/licenses/MIT</url>
+            <name>LG Electronics Internal</name>
+            <url>http://mod.lge.com/hub/webos-devops/jenkins/plugins/env-search-plugin/-/blob/main/LICENSE</url>
+            <distribution>internal</distribution>
+            <comments>Internal use within LG Electronics and authorized partners only — no external distribution</comments>
         </license>
     </licenses>
 
     <scm>
-        <connection>scm:git:https://github.com/elevne/build-env-search-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:elevne/build-env-search-plugin.git</developerConnection>
-        <url>https://github.com/elevne/build-env-search-plugin</url>
+        <connection>scm:git:http://mod.lge.com/hub/webos-devops/jenkins/plugins/env-search-plugin.git</connection>
+        <developerConnection>scm:git:http://mod.lge.com/hub/webos-devops/jenkins/plugins/env-search-plugin.git</developerConnection>
+        <url>http://mod.lge.com/hub/webos-devops/jenkins/plugins/env-search-plugin</url>
         <tag>${scmTag}</tag>
     </scm>
 
     <properties>
-        <jenkins.version>2.263.1</jenkins.version>
-        <java.level>8</java.level>
+        <!--
+            Development policy: build against the same Jenkins weekly that the
+            production cerberus-jenkins (webos-infraops/iac/manager-node/jenkins-setup)
+            is running. Jenkins enforces Plugin-Dependencies + Jenkins-Version at load
+            time — a higher Jenkins-Version in the manifest means cerberus refuses to
+            load the plugin. Track cerberus's actual version and bump in lockstep when
+            cerberus upgrades to a newer weekly.
+
+            Production runtime (cerberus): jenkins/jenkins:2.562-jdk21
+            Supported runtime range: 2.555.x LTS (forward-compat tested) ~ 2.562 weekly
+                                     (and any later weekly cerberus moves to).
+        -->
+        <jenkins.version>2.562</jenkins.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.263.x</artifactId>
-                <version>984.vb5eaac999a7e</version>
+                <artifactId>bom-2.555.x</artifactId>
+                <version>6421.v4a_efb_4b_3a_61d</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
