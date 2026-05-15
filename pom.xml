@@ -49,7 +49,7 @@
             Supported runtime range: 2.555.x LTS (forward-compat tested) ~ 2.562 weekly
                                      (and any later weekly cerberus moves to).
         -->
-        <jenkins.version>2.562</jenkins.version>
+        <jenkins.version>2.555</jenkins.version>
     </properties>
 
     <dependencyManagement>
